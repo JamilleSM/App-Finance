@@ -1,19 +1,19 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StatusBar} from 'react-native';
+
+import {NavigationContainer} from '@react-navigation/native';
+import Router from './src/routes/Router';
+import AuthProvider from './src/contexts/Auth';
 
 function App() {
   return (
-    <View style={styles.container}>
-      <Text>Olá</Text>
-    </View>
+    <NavigationContainer>
+      <AuthProvider>
+        <StatusBar backgroundColor="#1c1c1c" barStyle="light-content" />
+        <Router />
+      </AuthProvider>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default App;
