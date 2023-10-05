@@ -7,18 +7,24 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export const AuthContext = createContext<any>(null);
 
 function AuthProvider({children}: AuthProviderProps) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(false);
 
   const navigation = useNavigation();
 
   async function signUp(
-    name: String,
-    email: String,
-    password: String,
+    name: string,
+    email: string,
+    password: string,
   ): Promise<void> {
     setLoadingAuth(true);
     try {
@@ -37,8 +43,36 @@ function AuthProvider({children}: AuthProviderProps) {
     }
   }
 
+  async function signIn(email: string, password: string): Promise<void> {
+    setLoadingAuth(true);
+
+    try {
+      const response = await api.post('/login', {
+        email: email,
+        password: password,
+      });
+
+      const {id, name, token} = response.data;
+
+      const userData: User = {
+        id,
+        name,
+        email,
+      };
+      api.defaults.headers['Authorization'] = `Bearer ${token}`;
+
+      setUser(userData);
+
+      setLoadingAuth(false);
+    } catch (err) {
+      console.log('ERRO AO LOGAR', err);
+      setLoadingAuth(false);
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{signed: !!user, user, signUp, loadingAuth}}>
+    <AuthContext.Provider
+      value={{signed: !!user, user, signUp, signIn, loadingAuth}}>
       {children}
     </AuthContext.Provider>
   );
