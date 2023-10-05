@@ -1,4 +1,4 @@
-import React from 'React';
+import React from 'react';
 import {View, Text} from 'react-native';
 
 function Home() {
