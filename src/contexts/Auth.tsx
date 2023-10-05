@@ -1,7 +1,9 @@
-import React, {createContext, useState, ReactNode} from 'react';
+import React, {createContext, useState, useEffect, ReactNode} from 'react';
 
-import api from '../services/api';
 import {useNavigation} from '@react-navigation/native';
+import api from '../services/api';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -13,13 +15,44 @@ interface User {
   email: string;
 }
 
-export const AuthContext = createContext<any>(null);
+interface AuthContextType {
+  user: User | null;
+  signed: boolean;
+  loadingAuth: boolean;
+  loading: boolean;
+}
+
+export const AuthContext = createContext<AuthContextType | any>({});
 
 function AuthProvider({children}: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    async function loadStorage() {
+      const storageUser = await AsyncStorage.getItem('@finToken');
+
+      if (storageUser) {
+        try {
+          const response = await api.get('/me', {
+            headers: {
+              Authorization: `Bearer ${storageUser}`,
+            },
+          });
+          api.defaults.headers['Authorization'] = `Bearer ${storageUser}`;
+          setUser(response.data);
+          setLoading(false);
+        } catch (error) {
+          setUser(null);
+        }
+      }
+      setLoading(false);
+    }
+    loadStorage();
+  }, []);
 
   async function signUp(
     name: string,
@@ -59,6 +92,9 @@ function AuthProvider({children}: AuthProviderProps) {
         name,
         email,
       };
+
+      await AsyncStorage.setItem('@finToken', token);
+
       api.defaults.headers['Authorization'] = `Bearer ${token}`;
 
       setUser(userData);
@@ -70,9 +106,23 @@ function AuthProvider({children}: AuthProviderProps) {
     }
   }
 
+  async function signOut() {
+    await AsyncStorage.clear().then(() => {
+      setUser(null);
+    });
+  }
+
   return (
     <AuthContext.Provider
-      value={{signed: !!user, user, signUp, signIn, loadingAuth}}>
+      value={{
+        signed: !!user,
+        user,
+        signUp,
+        signIn,
+        signOut,
+        loadingAuth,
+        loading,
+      }}>
       {children}
     </AuthContext.Provider>
   );

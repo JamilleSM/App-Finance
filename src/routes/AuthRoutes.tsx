@@ -25,6 +25,7 @@ function AuthRoutes() {
           },
           headerTintColor: '#fff',
           headerTitle: 'Back',
+          headerShadowVisible: false,
         }}
       />
     </AuthStack.Navigator>

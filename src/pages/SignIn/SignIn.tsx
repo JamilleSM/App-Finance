@@ -1,5 +1,5 @@
 import React, {useState, useContext} from 'react';
-import {ActivityIndicator, Alert} from 'react-native';
+import {ActivityIndicator} from 'react-native';
 
 import {
   Background,
