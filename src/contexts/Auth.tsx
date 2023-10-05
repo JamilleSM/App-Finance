@@ -38,7 +38,7 @@ function AuthProvider({children}: AuthProviderProps) {
   }
 
   return (
-    <AuthContext.Provider value={{user, signUp, loadingAuth}}>
+    <AuthContext.Provider value={{signed: !!user, user, signUp, loadingAuth}}>
       {children}
     </AuthContext.Provider>
   );
